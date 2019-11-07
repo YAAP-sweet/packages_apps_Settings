@@ -109,4 +109,9 @@
     <string name="privacy_category_title">Privacy and Welfare Settings</string>
     <string name="user_category_title">User Information</string>
     <string name="usercard_summary">Current active user, tap for more info</string>
+
+    <!-- Three-fingers-swipe to screenshot -->
+    <string name="three_finger_gesture">Swipe to screenshot</string>
+    <string name="three_finger_gesture_summary">Swipe down with three fingers to take a screenshot</string>
+
 </resources>
