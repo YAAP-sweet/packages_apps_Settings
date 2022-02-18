@@ -122,4 +122,7 @@
     <string name="short_label">Short</string>
     <string name="long_label">Long</string>
 
+    <!-- Theme -->
+    <string name="pitch_colors">Pitch black theme</string>
+    <string name="pitch_colors_summary">Pitch black theme for Settings, SystemUI, etc</string>
 </resources>
