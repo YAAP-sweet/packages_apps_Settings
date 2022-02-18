@@ -17,22 +17,17 @@
 package com.android.settings.homepage;
 
 import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.app.settings.SettingsEnums;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.UserHandle;
-import android.os.UserManager;
-import android.provider.Settings;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toolbar;
 
 import androidx.fragment.app.Fragment;
@@ -40,17 +35,16 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.android.internal.util.UserIcons;
-
 import com.android.settings.R;
-import com.android.settings.accounts.AvatarViewMixin;
 import com.android.settings.core.CategoryMixin;
 import com.android.settings.core.FeatureFlags;
 import com.android.settings.homepage.contextualcards.ContextualCardsFragment;
 import com.android.settings.overlay.FeatureFactory;
 import com.android.settingslib.core.lifecycle.HideNonSystemOverlayMixin;
 
-import com.android.settingslib.drawable.CircleFramedDrawable;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import java.util.ArrayList;
 
 /** Settings homepage activity */
 public class SettingsHomepageActivity extends FragmentActivity implements
@@ -61,82 +55,118 @@ public class SettingsHomepageActivity extends FragmentActivity implements
     private static final long HOMEPAGE_LOADING_TIMEOUT_MS = 300;
 
     private View mHomepageView;
-    private View mSuggestionView;
     private CategoryMixin mCategoryMixin;
+    CollapsingToolbarLayout collapsing_toolbar;
 
+    static ArrayList<String> text=new ArrayList<>();
+    static {
+        text.add("Arise, Young one.");
+	text.add("Welcome Stranger!");
+	text.add("One's soul shreds uniqueness.");
+        text.add("Calm down young one, catch your breath.");
+        text.add("Roquelaire, would you like a cracker?");
+        text.add("My little friend, always busy-busy.");
+        text.add("Ho ho! You found me!");
+        text.add("Welcome to the Secret Shop!");
+        text.add("Some tea while you wait?");
+        text.add("Those go together nicely.");
+        text.add("Your foes will fear you now.");
+        text.add("My favorite customer!");
+        text.add("Business is brisk.");
+        text.add("How is your journey little one?");
+        text.add("Mistakes are always part of one's life, youngster.");
+        text.add("Have a lucky day human!");
+        text.add("You can do it Stranger!");
+	text.add("It was never wrong to try, young one.");
+	text.add("The learned one strikes.");
+	text.add("They will never know what hit them.");
+	text.add("Turn the tables!");
+	text.add("The enemy will be destroyed, no matter the cost!");
+	text.add("A good strategist always keeps something in reserve.");
+	text.add("Never Settle?");
+	text.add("Gratitude unlocks the fullness of life, Milord.");
+	text.add("A joker is a little fool who is different from everyone else.");
+	text.add("Failure is not Fatal, Customer.");
+	text.add("Taking a rest is not a sin young man.");
+	text.add("What is truth, but a survivor's story?");
+	text.add("In a world without love, death means nothing.");
+	text.add("Always appreciate your own endeavors, Milord.");
+	text.add("Fear is the first of many foes.");
+	text.add("The climb may be long, but the view is worth it.");
+	text.add("The waves will drag you down, unless you fight to shore.");
+	text.add("The darker the night, the brighter the stars.");
+	text.add("Fight and be remembered, or die and be forgotten.");
+	text.add("In case no one asked, are you doing fine youngster?");
+	text.add("Nothing bears fruit from hatred, but disaster my friend.");
+	text.add("Another day to become a legend.");
+	text.add("In case no one told you this, you are awesome!");
+	text.add("My dear friend always busy, want some cookies?");
+	text.add("Never Forget the Arcanery.");
+	text.add("Show em what you got stranger!");
+	text.add("The Arcanery likes your presence.");
+	text.add("What shall the Arcanery grant unto you?");
+	text.add("Life is always full of mysteries.");
+	text.add("Find what you seek on Tresdins Lair.");
+	text.add("Seek and you shall find.");
+	text.add("Everyone is a survivor from the cruel reality.");
+	text.add("The Arcanery loves your efforts.");
+	text.add("Destiny awaits us all.");
+	text.add("From knowledge comes skill.");
+	text.add("What must be discovered?");
+	text.add("Even a master falters.");
+    }
+
+    static ArrayList<String> welcome=new ArrayList<>();
+    static {
+        welcome.add("Hi!");
+        welcome.add("Hello.");
+        welcome.add("Greetings.");
+        welcome.add("Good Day!");
+        welcome.add("Settings");
+    }
+    
     @Override
     public CategoryMixin getCategoryMixin() {
         return mCategoryMixin;
     }
-
-    /**
-     * Shows the homepage and shows/hides the suggestion together. Only allows to be executed once
-     * to avoid the flicker caused by the suggestion suddenly appearing/disappearing.
-     */
-    public void showHomepageWithSuggestion(boolean showSuggestion) {
-        if (mHomepageView == null) {
-            return;
-        }
-        Log.i(TAG, "showHomepageWithSuggestion: " + showSuggestion);
-        mSuggestionView.setVisibility(showSuggestion ? View.VISIBLE : View.GONE);
-        mHomepageView.setVisibility(View.VISIBLE);
-        mHomepageView = null;
-    }
-
-    private ImageView mAvatarView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_homepage_container);
 
-        final View appBar = findViewById(R.id.app_bar_container);
-        appBar.setMinimumHeight(getSearchBoxHeight());
-        initHomepageContainer();
 
-        final Toolbar toolbar = findViewById(R.id.search_action_bar);
+        final View root = findViewById(R.id.settings_homepage_container);
+	LinearLayout commonCon = root.findViewById(R.id.common_con);
+        final Toolbar toolbar = root.findViewById(R.id.search_action_bar);
+	collapsing_toolbar =  root.findViewById(R.id.collapsing_toolbar);
+        TextView greeter = root.findViewById(R.id.greeter);
+	greeter.setText(text.get(randomNum(0, text.size()-1)));
+
         FeatureFactory.getFactory(this).getSearchFeatureProvider()
                 .initSearchToolbar(this /* activity */, toolbar, SettingsEnums.SETTINGS_HOMEPAGE);
 
-        mAvatarView = findViewById(R.id.account_avatar);
-        updateAvatarView();
+	AppBarLayout appBarLayout = root.findViewById(R.id.appbar);
+        appBarLayout.addOnOffsetChangedListener((appBarLayout1, i) -> {
+
+            float abs = ((float) Math.abs(i)) / ((float) appBarLayout1.getTotalScrollRange());
+            float f2 = 1.0f - abs;
+            //greeter text
+            if (f2 == 1.0)
+                ObjectAnimator.ofFloat(greeter, View.ALPHA, 1f).setDuration(500).start();
+            else
+                greeter.setAlpha(0f);
+
+        });
 
         getLifecycle().addObserver(new HideNonSystemOverlayMixin(this));
+	collapsing_toolbar.setTitle(welcome.get(randomNum(0, welcome.size()-1)));
         mCategoryMixin = new CategoryMixin(this);
         getLifecycle().addObserver(mCategoryMixin);
 
-        if (!getSystemService(ActivityManager.class).isLowRamDevice()) {
-            // Only allow features on high ram devices.
-            showSuggestionFragment();
-
-            if (FeatureFlagUtils.isEnabled(this, FeatureFlags.CONTEXTUAL_HOME)) {
-                showFragment(new ContextualCardsFragment(), R.id.contextual_cards_content);
-            }
-        }
         showFragment(new TopLevelSettings(), R.id.main_content);
         ((FrameLayout) findViewById(R.id.main_content))
                 .getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
-    }
-
-    private void showSuggestionFragment() {
-        final Class<? extends Fragment> fragment = FeatureFactory.getFactory(this)
-                .getSuggestionFeatureProvider(this).getContextualSuggestionFragment();
-        if (fragment == null) {
-            return;
-        }
-
-        mSuggestionView = findViewById(R.id.suggestion_content);
-        mHomepageView = findViewById(R.id.settings_homepage_container);
-        // Hide the homepage for preparing the suggestion.
-        mHomepageView.setVisibility(View.GONE);
-        // Schedule a timer to show the homepage and hide the suggestion on timeout.
-        mHomepageView.postDelayed(() -> showHomepageWithSuggestion(false),
-                HOMEPAGE_LOADING_TIMEOUT_MS);
-        try {
-            showFragment(fragment.getConstructor().newInstance(), R.id.suggestion_content);
-        } catch (Exception e) {
-            Log.w(TAG, "Cannot show fragment", e);
-        }
     }
 
     private void showFragment(Fragment fragment, int id) {
@@ -165,43 +195,8 @@ public class SettingsHomepageActivity extends FragmentActivity implements
         return searchBarHeight + searchBarMargin * 2;
     }
 
-    private Drawable getCircularUserIcon(Context context) {
-        UserManager userManager = context.getSystemService(UserManager.class);
-        Bitmap bitmapUserIcon = userManager.getUserIcon(UserHandle.myUserId());
-
-        if (bitmapUserIcon == null) {
-            // get default user icon.
-            final Drawable defaultUserIcon = UserIcons.getDefaultUserIcon(
-                    context.getResources(), UserHandle.myUserId(), false);
-            bitmapUserIcon = UserIcons.convertToBitmap(defaultUserIcon);
-        }
-        Drawable drawableUserIcon = new CircleFramedDrawable(bitmapUserIcon,
-                (int) context.getResources().getDimension(R.dimen.circle_avatar_size));
-
-        return drawableUserIcon;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateAvatarView();
-    }
-
-    private void updateAvatarView() {
-        boolean isMulti = Settings.Global.getInt(getApplicationContext().getContentResolver(),
-                Settings.Global.USER_SWITCHER_ENABLED, 0) == 1;
-        if (isMulti) {
-            mAvatarView.setImageDrawable(getCircularUserIcon(getApplicationContext()));
-            mAvatarView.setOnClickListener(v -> {
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.setComponent(new ComponentName("com.android.settings",
-                        "com.android.settings.Settings$UserSettingsActivity"));
-                startActivity(intent);
-            });
-        } else {
-            mAvatarView.setImageDrawable(null);
-            mAvatarView.setOnClickListener(null);
-        }
-        mAvatarView.setVisibility(isMulti ? View.VISIBLE : View.GONE);
+    private int randomNum(int min , int max) {
+	int r = (max - min) + 1;
+	return (int)(Math.random() * r) + min;
     }
 }
